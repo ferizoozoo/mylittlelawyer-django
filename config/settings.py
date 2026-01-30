@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'accounts',
+    'chat',
+    'forms',
 ]
 
 MIDDLEWARE = [
@@ -84,6 +88,10 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
+
+# MongoDB (chat sessions / metadata)
+MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb://mongo:27017')
+MONGODB_DB_NAME = os.getenv('MONGODB_DB_NAME', 'mylittlelawyer')
 
 
 # Password validation
