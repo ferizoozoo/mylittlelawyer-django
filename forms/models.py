@@ -4,6 +4,7 @@ from accounts.models import User
 
 class Form(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="forms")
     pdf_bucket_url = models.URLField()
     created_at = models.DateTimeField(auto_now_add=True)
