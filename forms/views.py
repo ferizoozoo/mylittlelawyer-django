@@ -1,16 +1,9 @@
 from rest_framework.generics import ListAPIView
-from rest_framework.pagination import PageNumberPagination
-
 from accounts.authentication import UserJWTAuthentication
 
 from .models import Form
 from .serializers import FormSerializer
-
-
-class FormsPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = "page_size"
-    max_page_size = 100
+from .paginations import FormsPagination
 
 
 class UserFormsListView(ListAPIView):
