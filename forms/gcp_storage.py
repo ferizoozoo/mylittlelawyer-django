@@ -1,5 +1,5 @@
 from __future__ import annotations
-from configs import *
+from config import *
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Optional
