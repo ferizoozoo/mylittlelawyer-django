@@ -1,9 +1,14 @@
 from __future__ import annotations
-from config import *
+
+"""Utilities for uploading and downloading PDF files in GCP Cloud Storage."""
+
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Optional
+
 from google.cloud import storage
+
+from .configs import *
 
 @dataclass(frozen=True)
 class GCPStorageConfig:
@@ -18,6 +23,7 @@ def get_storage_client(config: Optional[GCPStorageConfig] = None) -> storage.Cli
 
     Uses explicit service-account JSON if provided; otherwise relies on
     Application Default Credentials (ADC) in the runtime environment.
+    This function does not validate bucket access; it only creates a client.
     """
     if config is None:
         config = GCPStorageConfig(
@@ -41,6 +47,7 @@ def get_bucket(config: Optional[GCPStorageConfig] = None) -> storage.Bucket:
 
     Raises ValueError when the bucket name is missing because all storage
     operations require a target bucket.
+    The bucket object is a lightweight handle; no network call is made here.
     """
     if config is None:
         config = GCPStorageConfig(
@@ -69,6 +76,7 @@ def upload_pdf(
     - file_bytes: raw PDF data (bytes)
     - destination_path: object path within the bucket
     - content_type: defaults to application/pdf
+    - returns: public URL (requires bucket/object ACL or uniform access policy)
     """
     bucket = get_bucket(config)
     blob = bucket.blob(destination_path)
@@ -87,6 +95,7 @@ def upload_pdf_fileobj(
     Upload a PDF from a file-like object and return the public URL.
 
     Use this for streaming uploads (e.g., from Django file uploads).
+    The file object must be opened in binary mode.
     """
     bucket = get_bucket(config)
     blob = bucket.blob(destination_path)
@@ -103,6 +112,7 @@ def download_pdf(
     Download a PDF from GCP and return it as raw bytes.
 
     - source_path: object path within the bucket
+    - returns: bytes suitable for direct file writes or HTTP responses
     """
     bucket = get_bucket(config)
     blob = bucket.blob(source_path)
@@ -119,6 +129,7 @@ def download_pdf_to_fileobj(
     Download a PDF into a file-like object.
 
     Returns the same file object (rewound to the start) for convenience.
+    The file object must be writable and opened in binary mode.
     """
     bucket = get_bucket(config)
     blob = bucket.blob(source_path)

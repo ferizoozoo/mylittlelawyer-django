@@ -9,7 +9,9 @@ from .serializers import LoginSerializer, RegisterSerializer
 
 
 class RegisterView(APIView):
+    """Create a new user account and return an access token."""
     def post(self, request):
+        """Validate input, create the user, and issue a JWT."""
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -29,7 +31,9 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    """Authenticate a user and return an access token."""
     def post(self, request):
+        """Verify credentials and issue a JWT on success."""
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -51,16 +55,20 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    """Stateless logout endpoint (client discards token)."""
     authentication_classes = [UserJWTAuthentication]
 
     def post(self, request):
+        """Return 204 to indicate the client should forget the token."""
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DeleteAccountView(APIView):
+    """Delete the authenticated user's account."""
     authentication_classes = [UserJWTAuthentication]
 
     def delete(self, request):
+        """Permanently remove the authenticated user record."""
         user: User = request.user
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -12,18 +12,22 @@ from .gcp_storage import upload_pdf_fileobj
 from .paginations import FormsPagination
 
 class UserFormsListView(ListAPIView):
+    """Return a paginated list of forms belonging to the authenticated user."""
     authentication_classes = [UserJWTAuthentication]
     serializer_class = FormSerializer
     pagination_class = FormsPagination
 
     def get_queryset(self):
+        """Limit results to the current user, newest first."""
         return Form.objects.filter(user=self.request.user).order_by("-created_at")
 
 class SaveFormView(APIView):
+    """Upload a PDF to GCP and create the corresponding Form record."""
     authentication_classes = [UserJWTAuthentication]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
+        """Handle multipart upload and persist the GCP URL on success."""
         file_obj = request.FILES.get("file")
         if not file_obj:
             return Response(
@@ -49,10 +53,12 @@ class SaveFormView(APIView):
 
 
 class UpdateFormView(APIView):
+    """Replace the stored PDF and/or update metadata for a user's form."""
     authentication_classes = [UserJWTAuthentication]
     parser_classes = [MultiPartParser, FormParser]
 
     def put(self, request, form_id):
+        """Upload a new PDF and/or update title for the selected form."""
         form = Form.objects.filter(id=form_id, user=request.user).first()
         if not form:
             return Response({"detail": "Form not found."}, status=status.HTTP_404_NOT_FOUND)

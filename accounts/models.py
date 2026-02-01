@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.functions import Lower
 
 class User(models.Model):
+    """Application user stored separately from Django's built-in auth user."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     full_name = models.TextField()
     email = models.EmailField()
@@ -19,4 +20,5 @@ class User(models.Model):
         ]
 
     def __str__(self) -> str:
-                    return self.full_name
+        """Human-readable label for admin lists and logs."""
+        return self.full_name

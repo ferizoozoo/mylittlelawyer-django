@@ -9,9 +9,11 @@ from .models import User
 
 
 class UserJWTAuthentication(authentication.BaseAuthentication):
+    """Custom JWT authentication tied to the accounts.User model."""
     keyword = "Bearer"
 
     def authenticate(self, request):
+        """Validate a Bearer token and return (user, token) or raise."""
         auth = authentication.get_authorization_header(request).split()
         if not auth or auth[0].decode().lower() != self.keyword.lower():
             return None
@@ -37,6 +39,7 @@ class UserJWTAuthentication(authentication.BaseAuthentication):
 
     @staticmethod
     def create_access_token(user_id: str) -> AccessToken:
+        """Create a short-lived access token containing the user id."""
         token = AccessToken()
         token["user_id"] = user_id
         token["iss"] = settings.SECRET_KEY
