@@ -7,7 +7,7 @@ import httpx
 from django.conf import settings
 
 from .constants import (
-    FASTAPI_ENDPOINT, FASTAPI_TIMEOUT,
+    FASTAPI_TIMEOUT,
     FIELD_NEW_MESSAGE, FIELD_CHAT_HISTORY, FIELD_FORM,
     HTTP_ERROR
 )
@@ -31,6 +31,7 @@ class FastAPIClient:
     
     @staticmethod
     async def send_chat_request(
+        endpoint: str,
         new_message: Dict[str, Any], 
         chat_history: Optional[List[Dict[str, Any]]] = None,
         form: Optional[Dict[str, Any]] = None
@@ -47,7 +48,7 @@ class FastAPIClient:
             httpx.Response object (or ErrorResponse mock on failure)
         """
         base_url = getattr(settings, 'FASTAPI_URL', 'http://localhost:8001')
-        endpoint = f"{base_url}{FASTAPI_ENDPOINT}"
+        endpoint = f"{base_url}{endpoint}"
         payload = {
             FIELD_NEW_MESSAGE: new_message,
             FIELD_CHAT_HISTORY: chat_history if chat_history else None,

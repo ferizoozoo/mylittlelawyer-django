@@ -12,9 +12,11 @@ from .serializers import MessageSerializer
 from .data import ChatCollection, MessageCollection
 from .fastapi_client import FastAPIClient
 from .constants import (
-    FIELD_ID, FIELD_CHAT_ID, FIELD_MESSAGE, FIELD_RESPONSE, FIELD_FILE,
+    FASTAPI_CHAT_ENDPOINT,
+    FORM,
     RESPONSE_TYPE_CHAT_CREATED, RESPONSE_OK, RESPONSE_ERRORS,
-    ERROR_INVALID_JSON, ERROR_INVALID_PAYLOAD, HTTP_OK
+    ERROR_INVALID_JSON, ERROR_INVALID_PAYLOAD, HTTP_OK,
+    FIELD_ID, FIELD_CHAT_ID, FIELD_MESSAGE, FIELD_RESPONSE, FIELD_FILE
 )
 
 logger = logging.getLogger(__name__)
@@ -52,46 +54,62 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not serializer.is_valid():
             return await self._send_json({RESPONSE_ERRORS: serializer.errors})
         
-        # Create and persist message
-        message_doc = MessageCollection.create_message_document(serializer.validated_data, chat_id)
-        try:
-            message_id = await MessageCollection.insert_message(message_doc)
-        except Exception:
-            logger.exception("Failed to insert message")
-            return await self._send_json({RESPONSE_ERRORS: "message_insert_failed"})
-        
-        message_doc[FIELD_ID] = str(message_id)
-        
-        # Fetch history and get form data
-        history = await MessageCollection.get_chat_history(chat_id, exclude_message_id=message_id)
-        chat_history = history if history else None
-        form_data = payload.get("form")
-        
-        # Get AI response from FastAPI
-        fastapi_response = await FastAPIClient.send_chat_request(
-            new_message=message_doc,
-            chat_history=chat_history,
-            form=form_data
-        )
-        
-        if fastapi_response.status_code != HTTP_OK:
-            return await self._send_json({RESPONSE_ERRORS: fastapi_response.text})
-        
-        response_data = fastapi_response.json()
-        message_doc[FIELD_RESPONSE] = response_data
-        
-        # Handle file upload if present
-        if response_data.get(FIELD_FILE):
-            asyncio.create_task(
-                MessageCollection.upload_response_file(response_data[FIELD_FILE], message_id, chat_id)
+        # TODO: create a loop that cycles the request-response 
+        # and then steps out of the loop if form is not null
+        while True:
+                # Create and persist message
+            message_doc = MessageCollection.create_message_document(serializer.validated_data, chat_id)
+            if message_doc[FORM] is not None:
+                break
+            try:
+                message_id = await MessageCollection.insert_message(message_doc)
+            except Exception:
+                logger.exception("Failed to insert message")
+                return await self._send_json({RESPONSE_ERRORS: "message_insert_failed"})
+            
+            message_doc[FIELD_ID] = str(message_id)
+            
+            # Fetch history and get form data
+            history = await MessageCollection.get_chat_history(chat_id, exclude_message_id=message_id)
+            chat_history = history if history else None
+            form_data = payload.get("form")
+            
+            # Get AI response from FastAPI
+            fastapi_response = await FastAPIClient.send_chat_request(
+                endpoint=FASTAPI_CHAT_ENDPOINT,
+                new_message=message_doc,
+                chat_history=chat_history,
+                form=form_data
             )
-        
-        await self._send_json({RESPONSE_OK: True, FIELD_MESSAGE: message_doc})
+            
+            if fastapi_response.status_code != HTTP_OK:
+                return await self._send_json({RESPONSE_ERRORS: fastapi_response.text})
+
+            # Create and persist message from the FastAPI response
+            message_doc = MessageCollection.create_message_document(fastapi_response.json(), chat_id)
+            try:
+                message_id = await MessageCollection.insert_message(message_doc)
+            except Exception:
+                logger.exception("Failed to insert message")
+                return await self._send_json({RESPONSE_ERRORS: "message_insert_failed"})    
+            
+            response_data = fastapi_response.json()
+            message_doc[FIELD_RESPONSE] = response_data
+            
+            # Handle file upload if present
+            if response_data.get(FIELD_FILE):
+                asyncio.create_task(
+                    MessageCollection.upload_response_file(response_data[FIELD_FILE], message_id, chat_id)
+                )
+            
+            await self._send_json({RESPONSE_OK: True, FIELD_MESSAGE: message_doc})
     
     async def chat_messages(self, event):
         """Handle channel layer events for chat messages."""
         await self._send_json({FIELD_MESSAGE: event.get(FIELD_MESSAGE)})
     
+    # utility functions
+
     async def _send_json(self, payload: Dict[str, Any]) -> None:
         """Send JSON payload to WebSocket client, converting ObjectIds to strings."""
         message = payload.get(FIELD_MESSAGE)
