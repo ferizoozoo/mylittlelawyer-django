@@ -47,13 +47,13 @@ class FastAPIClient:
         Returns:
             httpx.Response object (or ErrorResponse mock on failure)
         """
-        base_url = getattr(settings, 'FASTAPI_URL', 'http://localhost:8000')
-        endpoint = f"{base_url}{endpoint}"
         payload = {
             FIELD_NEW_MESSAGE: new_message,
             FIELD_CHAT_HISTORY: chat_history if chat_history else None,
             # FIELD_FORM: form
         }
+
+        print(f'hello from {endpoint}')
         
         try:
             async with httpx.AsyncClient(timeout=FASTAPI_TIMEOUT) as client:
