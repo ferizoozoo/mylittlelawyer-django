@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'accounts',
     'chat',
@@ -101,6 +102,8 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+FASTAPI_URL = os.getenv('FASTAPI_URL', 'http://localhost:8000') 
 
 # MongoDB (chat sessions / metadata)
 MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017')
