@@ -12,7 +12,7 @@ from django.utils import timezone
 from config.mongo import get_mongo_db
 from forms import gcp_storage
 from .constants import (
-    CHATS_COLLECTION, MESSAGES_COLLECTION,
+    CHATS_COLLECTION, FIELD_FORM, MESSAGES_COLLECTION,
     CHAT_STATUS_DRAFT, FIELD_CHAT_ID, FIELD_USER, FIELD_TITLE, FIELD_STATUS,
     FIELD_CREATED_AT, FIELD_UPDATED_AT, FIELD_ROLE, FIELD_CONTENT, FIELD_ID,
     FIELD_RESPONSE_FILE_URL, FIELD_DATA, FIELD_FILENAME,
@@ -56,6 +56,7 @@ class MessageCollection:
             FIELD_ROLE: validated_data.get(FIELD_ROLE),
             FIELD_CONTENT: validated_data.get(FIELD_CONTENT),
             FIELD_CREATED_AT: timezone.now().isoformat(),
+            FIELD_FORM: None
         }
     
     @staticmethod

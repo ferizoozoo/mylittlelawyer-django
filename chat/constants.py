@@ -5,7 +5,8 @@ CHATS_COLLECTION = "chats"
 MESSAGES_COLLECTION = "messages"
 
 # FastAPI Configuration
-FASTAPI_ENDPOINT = "/ai/chat/"
+FASTAPI_CHAT_ENDPOINT = "/ai/chat"
+FASTAPI_FORM_ENDPOINT = "/ai/file"
 FASTAPI_TIMEOUT = 30.0
 
 # Chat Status
@@ -26,6 +27,7 @@ FIELD_RESPONSE_FILE_URL = "response_file_url"
 FIELD_FILE = "file"
 FIELD_DATA = "data"
 FIELD_FILENAME = "filename"
+FIELD_FORM = "form"
 
 # FastAPI Payload Fields
 FIELD_NEW_MESSAGE = "new_message"
