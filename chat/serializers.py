@@ -44,6 +44,7 @@ class MessageSerializer(serializers.Serializer):
     role = serializers.CharField(max_length=16, default="user")
     content = serializers.CharField(max_length=1000)
     created_at = serializers.DateTimeField(read_only=True)
+    # form = serializers.CharField(allow_null=True)
 
     def validate_role(self, value):
         if value not in dict(self.ROLE_CHOICES):

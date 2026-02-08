@@ -34,7 +34,7 @@ class FastAPIClient:
         endpoint: str,
         new_message: Dict[str, Any], 
         chat_history: Optional[List[Dict[str, Any]]] = None,
-        form: Optional[Dict[str, Any]] = None
+        # form: Optional[Dict[str, Any]] = None
     ) -> httpx.Response:
         """
         Send message and chat history to FastAPI service and get AI response.
@@ -47,12 +47,12 @@ class FastAPIClient:
         Returns:
             httpx.Response object (or ErrorResponse mock on failure)
         """
-        base_url = getattr(settings, 'FASTAPI_URL', 'http://localhost:8001')
+        base_url = getattr(settings, 'FASTAPI_URL', 'http://localhost:8000')
         endpoint = f"{base_url}{endpoint}"
         payload = {
             FIELD_NEW_MESSAGE: new_message,
             FIELD_CHAT_HISTORY: chat_history if chat_history else None,
-            FIELD_FORM: form
+            # FIELD_FORM: form
         }
         
         try:
@@ -61,3 +61,5 @@ class FastAPIClient:
         except httpx.RequestError as exc:
             logger.exception("Failed to send request to FastAPI service")
             return ErrorResponse(str(exc))
+
+    
