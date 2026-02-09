@@ -34,6 +34,7 @@ FIELD_FORM = "form"
 FIELD_SESSION_ID = "session_id"
 FIELD_MESSAGE = "message"
 FIELD_CHAT_HISTORY = "chat_history"
+FIELD_REFRESH_INDEX = "refresh_index"
 FIELD_FORM = "form"
 
 # WebSocket Response Types

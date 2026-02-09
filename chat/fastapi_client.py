@@ -11,6 +11,7 @@ from .constants import (
     FIELD_CHAT_ID,
     FIELD_MESSAGE,
     FIELD_NEW_MESSAGE, FIELD_CHAT_HISTORY, FIELD_FORM,
+    FIELD_REFRESH_INDEX,
     FIELD_SESSION_ID,
     HTTP_ERROR
 )
@@ -38,6 +39,7 @@ class FastAPIClient:
         message: str, 
         session_id: str,
         chat_history: Optional[List[Dict[str, Any]]] = None,
+        refresh_index: bool = False
         # form: Optional[Dict[str, Any]] = None
     ) -> httpx.Response:
         """
@@ -55,7 +57,7 @@ class FastAPIClient:
             FIELD_SESSION_ID: session_id,
             FIELD_MESSAGE: message,
             FIELD_CHAT_HISTORY: chat_history if chat_history else None,
-            # FIELD_FORM: form
+            FIELD_REFRESH_INDEX: refresh_index
         }
 
         try:
